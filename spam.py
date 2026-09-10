@@ -1,12 +1,18 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, confusion_matrix
+"""Simple spam-message classifier using a bag-of-words Naive Bayes model."""
 
-# small dataset i made myself, normally you would use a bigger csv file
-# but this is enough to show how it works
-emails = [
+from typing import List, Sequence, Tuple
+
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+
+RANDOM_SEED = 1
+TEST_SIZE = 0.3
+
+EMAILS: Sequence[Tuple[str, str]] = [
     ("win a free iphone now click here", "spam"),
     ("congratulations you won a lottery claim your prize", "spam"),
     ("limited time offer buy now and save 50%", "spam"),
@@ -22,7 +28,6 @@ emails = [
     ("your loan has been approved click to withdraw", "spam"),
     ("exclusive deal just for you click now", "spam"),
     ("free trial no credit card needed sign up now", "spam"),
-
     ("hey are we still meeting for lunch tomorrow", "ham"),
     ("can you send me the report before friday", "ham"),
     ("happy birthday hope you have a great day", "ham"),
@@ -41,41 +46,83 @@ emails = [
     ("let's grab coffee sometime this week", "ham"),
 ]
 
-df = pd.DataFrame(emails, columns=["text", "label"])
-print(df.head())
-print("\ncount per label:")
-print(df["label"].value_counts())
-
-x = df["text"]
-y = df["label"]
-
-# turn text into numbers, basically counting words
-vectorizer = CountVectorizer()
-x_vec = vectorizer.fit_transform(x)
-
-x_train, x_test, y_train, y_test = train_test_split(x_vec, y, test_size=0.3, random_state=1)
-
-model = MultinomialNB()
-model.fit(x_train, y_train)
-
-preds = model.predict(x_test)
-
-acc = accuracy_score(y_test, preds)
-print(f"\naccuracy: {acc}")
-
-print("confusion matrix:")
-print(confusion_matrix(y_test, preds, labels=["ham", "spam"]))
-
-# testing on new messages that were not in the training data
-new_messages = [
+NEW_MESSAGES = [
     "click here to win a free laptop",
     "hey can you call me back when you're free",
     "urgent claim your prize before it expires",
-    "let's meet at the library at 5"
+    "let's meet at the library at 5",
 ]
 
-new_vec = vectorizer.transform(new_messages)
-new_preds = model.predict(new_vec)
 
-for msg, label in zip(new_messages, new_preds):
-    print(f"'{msg}' -> {label}")
+def build_dataset() -> pd.DataFrame:
+    """Return the example messages as a labeled DataFrame."""
+    return pd.DataFrame(EMAILS, columns=["text", "label"])
+
+
+def build_model() -> Pipeline:
+    """Build the vectorization + Naive Bayes pipeline."""
+    return Pipeline(
+        steps=[
+            ("vectorizer", CountVectorizer()),
+            ("classifier", MultinomialNB()),
+        ]
+    )
+
+
+def train_model(
+    df: pd.DataFrame, test_size: float = TEST_SIZE, random_state: int = RANDOM_SEED
+) -> Tuple[Pipeline, pd.Series, pd.Series, pd.Series, pd.Series]:
+    """Split the dataset, train the classifier, and return the test data."""
+    if df.empty:
+        raise ValueError("Dataset must not be empty")
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        df["text"],
+        df["label"],
+        test_size=test_size,
+        random_state=random_state,
+        stratify=df["label"],
+    )
+
+    model = build_model()
+    model.fit(x_train, y_train)
+    return model, x_train, x_test, y_train, y_test
+
+
+def evaluate_model(model: Pipeline, x_test: pd.Series, y_test: pd.Series) -> None:
+    """Print standard classification metrics."""
+    predictions = model.predict(x_test)
+    accuracy = accuracy_score(y_test, predictions)
+
+    print(f"\nAccuracy: {accuracy:.2%}")
+    print("\nClassification report:")
+    print(classification_report(y_test, predictions, labels=["ham", "spam"], zero_division=0))
+
+    print("Confusion matrix [ham, spam]:")
+    print(confusion_matrix(y_test, predictions, labels=["ham", "spam"]))
+
+
+def predict_messages(model: Pipeline, messages: List[str]) -> List[str]:
+    """Classify a list of previously unseen messages."""
+    if not messages:
+        return []
+    return list(model.predict(messages))
+
+
+def main() -> None:
+    """Run the complete spam-detection example."""
+    df = build_dataset()
+    print(df.head())
+    print("\nCount per label:")
+    print(df["label"].value_counts())
+
+    model, _, x_test, _, y_test = train_model(df)
+    evaluate_model(model, x_test, y_test)
+
+    print("Predictions for new messages:")
+    for message, label in zip(NEW_MESSAGES, predict_messages(model, NEW_MESSAGES)):
+        print(f"'{message}' -> {label}")
+
+
+if __name__ == "__main__":
+    main()
