@@ -1,22 +1,69 @@
 # Spam Email Classifier
 
-A simple machine learning project that classifies text messages as spam or ham (not spam) using a Naive Bayes classifier.
+A lightweight text-classification project that detects whether a message is **spam** or **ham** (not spam) using a bag-of-words representation and Multinomial Naive Bayes.
 
-## How it works
-1. A small set of example messages (spam and ham) is used as training data.
-2. The text is converted into numeric features using `CountVectorizer` (bag-of-words).
-3. A Multinomial Naive Bayes model is trained on the data.
-4. The model is tested on unseen messages to check if it classifies them correctly.
+## Overview
 
-## Run it
+The pipeline is intentionally simple so the core machine-learning workflow is easy to understand:
+
+1. Build a small labeled dataset of spam and ham messages.
+2. Convert text into numerical features with `CountVectorizer`.
+3. Split the data into training and test sets.
+4. Train a `MultinomialNB` classifier.
+5. Evaluate predictions with accuracy and a confusion matrix.
+6. Run the trained model on new messages.
+
+## Example
+
+The script includes unseen example messages such as:
+
+- Promotional or suspicious messages → `spam`
+- Normal meeting and personal messages → `ham`
+
+## Results
+
+The current demonstration reports approximately **90% test accuracy**. Because the dataset is small and manually created, this number should not be interpreted as production-level performance.
+
+## Installation
+
+```bash
+pip install -r requirements.txt
 ```
+
+Or install the dependencies directly:
+
+```bash
 pip install pandas scikit-learn
+```
+
+## Usage
+
+```bash
 python spam.py
 ```
 
-## Results
-- Accuracy: ~90% on the test set
-- Correctly classifies new messages like "click here to win a free laptop" as spam and "let's meet at the library at 5" as ham
+The program prints the dataset preview, label distribution, test accuracy, confusion matrix, and predictions for new messages.
 
-## Notes
-The dataset used here is small and made up for demonstration purposes. For a more robust model, a larger real-world dataset (like the SMS Spam Collection dataset) would give better results.
+## Project Structure
+
+```text
+.
+├── spam.py
+├── requirements.txt
+└── README.md
+```
+
+## Limitations & Next Steps
+
+The current dataset is deliberately small and synthetic. A stronger version could use a public dataset such as the SMS Spam Collection and add:
+
+- TF-IDF features
+- precision, recall, and F1-score
+- cross-validation
+- model comparison
+- a larger real-world dataset
+- a small web/API interface for inference
+
+## Tech Stack
+
+Python · Pandas · scikit-learn · NLP · Multinomial Naive Bayes
