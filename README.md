@@ -4,16 +4,17 @@ A lightweight NLP classification project that detects whether a message is **spa
 
 [![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![CI](https://github.com/rrstii/spam-detector/actions/workflows/ci.yml/badge.svg)](https://github.com/rrstii/spam-detector/actions/workflows/ci.yml)
 
 ## Project Overview
 
-The project demonstrates a simple end-to-end text-classification pipeline:
+The project demonstrates a compact end-to-end text-classification pipeline:
 
 1. Create a small labeled dataset of spam and legitimate messages.
 2. Convert text into numerical features with `CountVectorizer`.
-3. Split the data into training and test sets.
-4. Train a `MultinomialNB` classifier.
-5. Evaluate predictions with accuracy and a confusion matrix.
+3. Split the data using a reproducible stratified train/test split.
+4. Train a `MultinomialNB` classifier inside a scikit-learn `Pipeline`.
+5. Evaluate accuracy, precision, recall, F1-score, and the confusion matrix.
 6. Classify previously unseen example messages.
 
 ## Model Pipeline
@@ -32,9 +33,14 @@ Spam / Ham prediction
 
 ## Results
 
-With the included dataset and fixed train/test split, the demonstration achieves approximately **90% test accuracy**.
+With the included dataset and fixed stratified split, the demonstration achieves **90% test accuracy** on 10 held-out messages. The confusion matrix uses `[ham, spam]` ordering:
 
-The confusion matrix is also printed by the script. Because the dataset contains only 31 manually created examples, this result is **not representative of production performance**.
+```text
+[[4, 1],
+ [0, 5]]
+```
+
+The dataset contains only 31 manually created examples, so this result is **not representative of production performance**.
 
 ## Dataset
 
@@ -48,22 +54,38 @@ cd spam-detector
 pip install -r requirements.txt
 ```
 
+For development and tests:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 ## Usage
 
 ```bash
 python spam.py
 ```
 
-The script displays the dataset preview, class distribution, test accuracy, confusion matrix, and predictions for new messages.
+Run the test suite with:
+
+```bash
+python -m pytest -q
+```
+
+The script displays the dataset preview, class distribution, evaluation metrics, and predictions for new messages.
 
 ## Project Structure
 
 ```text
 spam-detector/
 ├── spam.py
+├── tests/
+│   └── test_spam.py
 ├── requirements.txt
+├── requirements-dev.txt
 ├── LICENSE
 ├── .gitignore
+├── .github/workflows/ci.yml
 └── README.md
 ```
 
@@ -72,11 +94,10 @@ spam-detector/
 This is an educational NLP project. A more robust version could:
 
 - Use a larger real-world dataset such as SMS Spam Collection.
-- Replace raw counts with TF-IDF features.
-- Report precision, recall, and F1-score.
-- Use stratified cross-validation.
+- Compare raw counts with TF-IDF features.
+- Use cross-validation for a more stable estimate.
 - Compare Naive Bayes with linear classifiers.
-- Separate data, training, and inference code into reusable modules.
+- Separate data loading from training and inference.
 - Expose the classifier through a small web API.
 
 ## Tech Stack
