@@ -1,39 +1,51 @@
 # Spam Email Classifier
 
-A lightweight text-classification project that detects whether a message is **spam** or **ham** (not spam) using a bag-of-words representation and Multinomial Naive Bayes.
+A lightweight NLP classification project that detects whether a message is **spam** or **ham** using bag-of-words features and a Multinomial Naive Bayes classifier.
 
-## Overview
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-F7931E?logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
 
-The pipeline is intentionally simple so the core machine-learning workflow is easy to understand:
+## Project Overview
 
-1. Build a small labeled dataset of spam and ham messages.
+The project demonstrates a simple end-to-end text-classification pipeline:
+
+1. Create a small labeled dataset of spam and legitimate messages.
 2. Convert text into numerical features with `CountVectorizer`.
 3. Split the data into training and test sets.
 4. Train a `MultinomialNB` classifier.
 5. Evaluate predictions with accuracy and a confusion matrix.
-6. Run the trained model on new messages.
+6. Classify previously unseen example messages.
 
-## Example
+## Model Pipeline
 
-The script includes unseen example messages such as:
-
-- Promotional or suspicious messages → `spam`
-- Normal meeting and personal messages → `ham`
+```text
+Raw messages
+     ↓
+CountVectorizer
+     ↓
+Bag-of-words features
+     ↓
+Multinomial Naive Bayes
+     ↓
+Spam / Ham prediction
+```
 
 ## Results
 
-The current demonstration reports approximately **90% test accuracy**. Because the dataset is small and manually created, this number should not be interpreted as production-level performance.
+With the included dataset and fixed train/test split, the demonstration achieves approximately **90% test accuracy**.
+
+The confusion matrix is also printed by the script. Because the dataset contains only 31 manually created examples, this result is **not representative of production performance**.
+
+## Dataset
+
+The dataset is intentionally small and embedded directly in `spam.py` so the machine-learning workflow remains easy to inspect and reproduce. It contains examples of promotional, suspicious, personal, and everyday messages.
 
 ## Installation
 
 ```bash
+git clone https://github.com/rrstii/spam-detector.git
+cd spam-detector
 pip install -r requirements.txt
-```
-
-Or install the dependencies directly:
-
-```bash
-pip install pandas scikit-learn
 ```
 
 ## Usage
@@ -42,28 +54,31 @@ pip install pandas scikit-learn
 python spam.py
 ```
 
-The program prints the dataset preview, label distribution, test accuracy, confusion matrix, and predictions for new messages.
+The script displays the dataset preview, class distribution, test accuracy, confusion matrix, and predictions for new messages.
 
 ## Project Structure
 
 ```text
-.
+spam-detector/
 ├── spam.py
 ├── requirements.txt
+├── LICENSE
+├── .gitignore
 └── README.md
 ```
 
-## Limitations & Next Steps
+## Limitations and Next Steps
 
-The current dataset is deliberately small and synthetic. A stronger version could use a public dataset such as the SMS Spam Collection and add:
+This is an educational NLP project. A more robust version could:
 
-- TF-IDF features
-- precision, recall, and F1-score
-- cross-validation
-- model comparison
-- a larger real-world dataset
-- a small web/API interface for inference
+- Use a larger real-world dataset such as SMS Spam Collection.
+- Replace raw counts with TF-IDF features.
+- Report precision, recall, and F1-score.
+- Use stratified cross-validation.
+- Compare Naive Bayes with linear classifiers.
+- Separate data, training, and inference code into reusable modules.
+- Expose the classifier through a small web API.
 
 ## Tech Stack
 
-Python · Pandas · scikit-learn · NLP · Multinomial Naive Bayes
+**Python · Pandas · scikit-learn · NLP · CountVectorizer · Multinomial Naive Bayes**
